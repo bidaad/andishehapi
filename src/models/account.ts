@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
 const Account = mongoose.model("Account", {
-    email: String,
     account_id: Number,
+    fullName: String,
+    username: String,
     password: String,
-    mobile: String,
-    active: Boolean,
-    challenge_code: String,
-    verified: Boolean
+    isActive: Boolean,
+    lastLoginDate: String,
+    createDate: String,
   });
 
 

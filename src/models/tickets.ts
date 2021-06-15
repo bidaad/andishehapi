@@ -1,3 +1,4 @@
+export{}
 const mongoose = require('mongoose');
 
 export const Ticket = mongoose.model("Ticket", 

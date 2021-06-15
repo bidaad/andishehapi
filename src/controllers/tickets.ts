@@ -11,7 +11,7 @@ export class TicketController extends RESTDataSource {
         const data = await Ticket.find({}, function (err, doc) {
 
         });
-        console.log(data)
+        
         return data
     }
 
