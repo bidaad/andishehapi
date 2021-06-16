@@ -26,6 +26,7 @@ export class AccountController extends RESTDataSource {
     const totalCount = await Account.find().count();
     return { result: true, message: '', totalCount: totalCount, data: data }
   }
+
   
   async getAccountById(Id: string) {
     const data = await Account.findById(Id);

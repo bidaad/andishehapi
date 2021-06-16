@@ -7,9 +7,9 @@ const Article = mongoose.model("Article", {
     tags: [String],
     status: String,
     createDate: String,
-    files: [Object],
+    files: [String],
     creatorId: String,
-    insGroupCode: Number
+    insGroupCodes: [String]
   });
 
 

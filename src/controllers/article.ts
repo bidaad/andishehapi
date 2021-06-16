@@ -1,7 +1,7 @@
 import { RequestOptions, RESTDataSource } from 'apollo-datasource-rest'
 import { sign } from 'jsonwebtoken'
 import { ACCESS_TOKEN_SECRET } from "../config";
-
+import  uuid  from '../utils.js'
 
 const Article = require('../models/article');
 const ArticleStatus = require('../models/articleStatus');
@@ -18,6 +18,7 @@ export class ArticleController extends RESTDataSource {
   async getArticle(Id: string) {
     const data = await Article.findById(Id);
     //console.log(data);
+    console.log(data);
 
     return data
   }
@@ -47,7 +48,7 @@ export class ArticleController extends RESTDataSource {
       ;
 
     const totalCount = await Article.find().count();
-    
+
 
     //console.log(data)
     return { result: true, message: '', totalCount: totalCount, data: data }
@@ -61,14 +62,17 @@ export class ArticleController extends RESTDataSource {
     return data
   }
 
-  async getArticlesTags(pageNo: Number, title: string) {
-    const data = await ArticleTag.find({ title: { $regex: '.*' + title + '.*' } }, function (err, doc) {
+  async getArticlesTags(pageNo: number, pageSize: number, filterText: String, sortType: String, sortkey: String) {
+    const data = await ArticleTag.find({
+      title: { $regex: '.*' + filterText + '.*' }
+    })
+      .skip(pageNo > 0 ? ((pageNo - 1) * pageSize) : 0)
+      .limit(pageSize)
+      ;
 
-    });
-    console.log('article tags');
+    const totalCount = await Article.find().count();
 
-
-    return data
+    return { result: true, message: '', totalCount: totalCount, data: data }
   }
 
 
@@ -94,7 +98,7 @@ export class ArticleController extends RESTDataSource {
     return article;
   }
 
-  async upsertArticle(id: string, title: string, description: string, status: string, tags: string[], insGroupCode: Number,
+  async upsertArticle(id: string, title: string, description: string, status: string, tags: string[], insGroupCodes: Number[], files: String[],
     dataSources: any) {
     const createDate = new Date().toString();
 
@@ -105,8 +109,9 @@ export class ArticleController extends RESTDataSource {
       status: status,
       createDate: createDate,
       creatorId: dataSources.req.account_id,
-      insGroupCode: insGroupCode,
+      insGroupCodes: insGroupCodes,
       tags: tags,
+      files: files
     });
     console.log('account id=', dataSources.req.account_id);
 
@@ -193,5 +198,53 @@ export class ArticleController extends RESTDataSource {
     }
 
   }
+
+
+  async uploadFile(id: string, entityType: string, file: any) {
+    const { createReadStream, filename, mimetype, encoding } = await file;
+    const path = require("path");
+    const { createWriteStream } = require("fs");
+    // Do work 💪
+
+    console.log(path.join("", "../uploads/", filename));
+
+    const fileExtension = filename.split('.').pop();
+    const newFileFullName = uuid() + '.' + fileExtension;
+    await new Promise((res) =>
+
+      createReadStream()
+        .pipe(
+          createWriteStream(
+            //path.join(__dirname, "../../../website/uploads/", filename)
+            path.join(__dirname, "../../uploads/", newFileFullName)
+          )
+        )
+        .on("close", res)
+
+    ).then(async () => {
+      switch (entityType) {
+        case 'Article':
+
+          const data = await Article.findById(id);
+          var files = data.files;
+          if (files === undefined)
+            files = [newFileFullName]
+          else
+            files.push(newFileFullName);
+          data.files = files;
+          await data.save();
+
+          break;
+
+        default:
+          break;
+      }
+    }
+    )
+
+    return { filename: newFileFullName, mimetype, encoding, url: '' }
+
+  }
 }
+
 

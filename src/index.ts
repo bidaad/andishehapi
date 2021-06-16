@@ -26,18 +26,27 @@ const startServer = async () => {
   //app.use( cors() );
   app.use(cookieParser());
 
-  
+  const path = require('path');
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
   app.use((req, _, next) => {
     //console.log(req.cookies);
+    //console.log('server1');
+    
     const accessToken = req.cookies['access-token']
     try {
       //console.log('my accessToken=' + accessToken);
-
+      if(accessToken !== '')
+      {
       const data = verify(accessToken, ACCESS_TOKEN_SECRET) as any
       //console.log('data userid = ' + data.account_id);
 
       (req as any).account_id = data.account_id;
-    } catch {
+      }
+      //console.log('server2');
+
+    } catch(err) {
+      //console.log(err);
       //console.log('error verify');
       
      }

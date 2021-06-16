@@ -1,6 +1,7 @@
-import { gql } from 'apollo-server'
+import { gql, GraphQLUpload } from 'apollo-server'
 
 const typeDefs = gql`
+  scalar FileUpload
   type Account {
     id: String!
     account_id: Int
@@ -27,7 +28,8 @@ const typeDefs = gql`
     createDate: String,
     creatorId: Int,
     tags: [String],
-    insGroupCode: Int
+    insGroupCodes: [String]
+    files: [String]
   }
 
   type ActionResult {
@@ -44,7 +46,12 @@ const typeDefs = gql`
     title: String
   }
 
- 
+  type UploadedFileResponse {
+      filename: String
+      mimetype: String
+      encoding: String
+      url: String
+    }
 
   type Company{
     id: String!
@@ -185,10 +192,18 @@ const typeDefs = gql`
     data: [Account]
   }
 
+  type ArticleTagResult{
+    result: Boolean
+    message: String
+    totalCount: Int
+    data: [ArticleTag]
+  }
+
   input LanguageInput{
     title: String
     masterLevel: String
   }
+
 
   input CompanyMemberInput{
     fullName: String
@@ -199,6 +214,14 @@ const typeDefs = gql`
     picFile: String
     description: String
   }
+
+  input InsGroupInput{
+    code: Int!
+    title: String!
+    parentCode: Int!
+  }
+
+
 
   type Query {
     #accounts
@@ -212,7 +235,7 @@ const typeDefs = gql`
     articleStatuses: [ArticleStatus]
 
     #tags
-    articleTags(pageNo: Int, title: String): [ArticleTag]
+    articleTags(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String): ArticleTagResult
     getTag(Id: String): ArticleTag
     tagArticles(pageNo: Int, pageSize: Int, tagTitle: String): [Article]
 
@@ -239,7 +262,8 @@ const typeDefs = gql`
 
 
     upsertArticle(
-      id: String , title: String, description: String, status: String, tags: [String], insGroupCode: Int
+      id: String , title: String, description: String, status: String, tags: [String], insGroupCodes: [String],
+      files: [String]
       ): Article
     deleteArticle(id: String): String
 
@@ -247,6 +271,10 @@ const typeDefs = gql`
     
     upsertTag(id: String , title: String): ArticleTag
     deleteTag(id: String): String
+
+    singleUpload(id: String, entityType: String, file: FileUpload!): UploadedFileResponse
+
+    saveInsGroups(data: [InsGroupInput]): Boolean
     
   }
 `
