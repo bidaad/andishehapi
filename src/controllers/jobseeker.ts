@@ -25,9 +25,7 @@ export class JobseekerController extends RESTDataSource {
     }
 
     async getJobseekers(pageNo: number) {
-        const data = await Jobseeker.find({}, function (err, doc) {
-
-        });
+        const data = await Jobseeker.find({});
         
         return data
     }

@@ -1,11 +1,11 @@
 import { IResolvers, GraphQLUpload } from 'apollo-server'
 
 const resolvers: IResolvers = {
-  FileUpload: GraphQLUpload,
+  //FileUpload: GraphQLUpload,
   Query: {
     me: async (_, res, dataSources) => {
       console.log(dataSources.req);
-      console.log('me iiiddd=' + dataSources.req.account_id);
+      //console.log('me iiiddd=' + dataSources.req.account_id);
 
 
       if (!dataSources.req.account_id)
@@ -39,6 +39,17 @@ const resolvers: IResolvers = {
       const data = dataSources.articleController.getArticlesStatuses()
       return data
     },
+    articleCountsByDate: async (_, {  }, dataSources) => {
+      const data = dataSources.articleController.articleCountsByDate()
+      return data
+    },
+    getArticleStatus: async (_, { Id }, dataSources) => {
+      const data = dataSources.articleController.getArticleStatus(Id)
+      return data
+    },
+
+
+
 
     //tags
     articleTags: async (_, { pageNo, pageSize, filterText, sortType, sortkey }, dataSources) => {
@@ -87,6 +98,10 @@ const resolvers: IResolvers = {
       const data = dataSources.accountController.upsertAccount(id, username, fullName, password, savedPassword, isActive, dataSources)
       return data
     },
+    deleteAccount: async (_, { id }, dataSources) => {
+      const data = dataSources.accountController.deleteAccount(id, dataSources)
+      return data
+    },
 
 
 
@@ -108,7 +123,7 @@ const resolvers: IResolvers = {
     },
 
     upsertArticle: async (_, { id, title, description, status, tags, insGroupCodes, files }, dataSources) => {
-      console.log('iiiddd=' + dataSources.req.account_id);
+      //console.log('iiiddd=' + dataSources.req.account_id);
 
       const data = dataSources.articleController.upsertArticle(id, title, description, status, tags, 
         insGroupCodes, files, dataSources)
@@ -118,6 +133,15 @@ const resolvers: IResolvers = {
       const data = dataSources.articleController.deleteArticle(id, dataSources)
       return data
     },
+    upsertArticleStatus: async (_, { id, title }, dataSources) => {
+      const data = dataSources.articleController.upsertArticleStatus(id, title, dataSources)
+      return data
+    },
+    deleteArticleStatus: async (_, { id }, dataSources) => {
+      const data = dataSources.articleController.deleteArticleStatus(id, dataSources)
+      return data
+    },
+
 
 
     //tags

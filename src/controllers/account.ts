@@ -27,13 +27,13 @@ export class AccountController extends RESTDataSource {
     return { result: true, message: '', totalCount: totalCount, data: data }
   }
 
-  
+
   async getAccountById(Id: string) {
     const data = await Account.findById(Id);
     return data
   }
 
-  async getCurrentAccount(account_id) {
+  async getCurrentAccount(account_id: string) {
     const user = await Account.findOne({ account_id: account_id });
 
     return user
@@ -117,7 +117,7 @@ export class AccountController extends RESTDataSource {
     });
 
     if (id !== null) {//is update
-      delete obj.createDate
+      //delete obj.createDate
     }
 
     if (password === savedPassword)
@@ -135,6 +135,22 @@ export class AccountController extends RESTDataSource {
     )
 
     return upsertedObj;
+  }
+
+  async deleteAccount(id: string) {
+    try {
+      const filter = { _id: new ObjectId(id) }
+      const upsertedObj = await Account.find(
+        filter,
+
+      ).remove()
+
+      return id;
+    }
+    catch (err) {
+      return null;
+    }
+
   }
 
 }

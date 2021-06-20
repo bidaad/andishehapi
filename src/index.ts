@@ -29,7 +29,7 @@ const startServer = async () => {
   const path = require('path');
   app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-  app.use((req, _, next) => {
+  app.use((req:any, _:any, next:any) => {
     //console.log(req.cookies);
     //console.log('server1');
     
@@ -55,9 +55,15 @@ const startServer = async () => {
   app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 
   server.applyMiddleware({ app, cors: corsOptions });
+  //server.graphqlPath = '/'
 
 
-  app.listen({ port: 4000 }, () =>
+  app.get('/', (req:any, res:any) => {
+    res.send('Andisheh API')
+});
+
+const port = process.env.port || 8000;
+  app.listen(port, () =>
     console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
   );
 

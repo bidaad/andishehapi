@@ -1,10 +1,11 @@
 {
-  "name": "andishehBackend",
+  "name": "andisheh-backend",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node-dev --respawn src/index.ts"
+    "start": "ts-node-dev --respawn src/index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@types/cookie-parser": "^1.4.2",

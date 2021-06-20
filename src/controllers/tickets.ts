@@ -8,9 +8,7 @@ export class TicketController extends RESTDataSource {
     }
 
     async getTickets(pageNo: number) {
-        const data = await Ticket.find({}, function (err, doc) {
-
-        });
+        const data = await Ticket.find({});
         
         return data
     }

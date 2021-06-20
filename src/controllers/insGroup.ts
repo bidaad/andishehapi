@@ -14,7 +14,7 @@ export class InsGroupController extends RESTDataSource {
     return data
   }
 
-  async save(insGroupsArray) {
+  async save(insGroupsArray: any) {
     const data = await InsGroup.deleteMany();
 
     for (let i = 0; i < insGroupsArray.length; i++) {

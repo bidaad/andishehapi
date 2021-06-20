@@ -1,7 +1,19 @@
 import { RequestOptions, RESTDataSource } from 'apollo-datasource-rest'
 import { sign } from 'jsonwebtoken'
 import { ACCESS_TOKEN_SECRET } from "../config";
-import  uuid  from '../utils.js'
+
+const getCurrentPersianDate = () => {
+  var moment = require('jalali-moment');
+  return moment().locale('fa').format('YYYY/MM/DD');
+  
+}
+
+const uuid = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+  });
+}
 
 const Article = require('../models/article');
 const ArticleStatus = require('../models/articleStatus');
@@ -20,6 +32,11 @@ export class ArticleController extends RESTDataSource {
     //console.log(data);
     console.log(data);
 
+    return data
+  }
+
+  async getArticleStatus(Id: string) {
+    const data = await ArticleStatus.findById(Id);
     return data
   }
 
@@ -55,9 +72,7 @@ export class ArticleController extends RESTDataSource {
   }
 
   async getArticlesStatuses() {
-    const data = await ArticleStatus.find({}, function (err, doc) {
-
-    });
+    const data = await ArticleStatus.find({} );
 
     return data
   }
@@ -101,13 +116,14 @@ export class ArticleController extends RESTDataSource {
   async upsertArticle(id: string, title: string, description: string, status: string, tags: string[], insGroupCodes: Number[], files: String[],
     dataSources: any) {
     const createDate = new Date().toString();
-
+    const strPersianCreateDate = getCurrentPersianDate();
     const obj = ({
       id: id,
       title: title,
       description: description,
       status: status,
       createDate: createDate,
+      persianCreateDate: strPersianCreateDate,
       creatorId: dataSources.req.account_id,
       insGroupCodes: insGroupCodes,
       tags: tags,
@@ -118,8 +134,9 @@ export class ArticleController extends RESTDataSource {
     if (id !== null) {
       console.log('is update');
 
-      delete obj.createDate
+      //delete obj.createDate
       delete obj.creatorId
+      //delete obj.persianCreateDate
     }
 
     const filter = { _id: new ObjectId(id) }
@@ -245,6 +262,95 @@ export class ArticleController extends RESTDataSource {
     return { filename: newFileFullName, mimetype, encoding, url: '' }
 
   }
+
+
+  async articleCountsByDate() {
+    try {
+      const data = await Article.aggregate([
+        {
+          $group: {
+            _id: "$persianCreateDate",
+            articleCount: { $sum: 1 }
+          }
+        },
+        {
+          $sort:
+            { _id: -1 }
+        },
+        {
+          $limit: 15
+        },
+      ]);
+
+      // var pipeline = [
+      //   {
+      //       "$group": {
+      //           "_id": "$keyword",
+      //           "total": { "$sum": 1 },
+      //           "llcId": { "$first": "$llcId"},
+      //           "categoryId": { "$first": "$categoryId"},
+      //           "parentId": { "$first": "$parentId"}
+      //       }
+      //   }
+    //];
+    
+    //db.keyword.aggregate(pipeline)
+
+      console.log(data);
+
+
+      return data;
+    }
+    catch (err) {
+      console.log(err);
+
+      return null;
+    }
+
+  }
+
+
+  async upsertArticleStatus(id: string, title: string,
+    dataSources: any) {
+
+    const obj = ({
+      id: id,
+      title: title,
+
+    });
+
+    const filter = { _id: new ObjectId(id) }
+    const upsertedObj = await ArticleStatus.findOneAndUpdate(
+      filter,
+      obj,
+      {
+        new: true, // Always returning updated work experiences.
+        upsert: true, // By setting this true, it will create if it doesn't exist
+        projection: {}, // without return _id and __v
+      }
+    )
+
+    return upsertedObj;
+  }
+
+  async deleteArticleStatus(id: string) {
+    try {
+      const filter = { _id: new ObjectId(id) }
+      const upsertedObj = await ArticleStatus.find(
+        filter,
+
+      ).remove()
+
+      return id;
+    }
+    catch (err) {
+      return null;
+    }
+
+  }
+
+
 }
+
 
 

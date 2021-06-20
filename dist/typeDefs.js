@@ -1,6 +1,7 @@
-import { gql, GraphQLUpload } from 'apollo-server'
-
-const typeDefs = gql`
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const apollo_server_1 = require("apollo-server");
+const typeDefs = apollo_server_1.gql `
   scalar FileUpload
   type Account {
     id: String!
@@ -288,6 +289,5 @@ const typeDefs = gql`
     saveInsGroups(data: [InsGroupInput]): Boolean
     
   }
-`
-
-module.exports = typeDefs
+`;
+module.exports = typeDefs;

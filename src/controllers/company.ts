@@ -62,9 +62,7 @@ export class CompanyController extends RESTDataSource {
     }
 
     async getCompanys(pageNo: number) {
-        const data = await company.find({}, function (err, doc) {
-
-        });
+        const data = await company.find({});
         
         return data
     }
