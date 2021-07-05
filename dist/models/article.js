@@ -8,8 +8,15 @@ const Article = mongoose.model("Article", {
     status: String,
     createDate: String,
     persianCreateDate: String,
-    files: [String],
+    files: [Object],
     creatorId: String,
-    insGroupCodes: [String]
+    insGroupCodes: [String],
+    zones: [String],
+    creatorName: String,
+    author: String,
+    source: String,
+    articleDate: String,
+    classification: Number,
+    comments: [Object]
 });
 module.exports = Article;

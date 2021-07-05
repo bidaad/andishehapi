@@ -1,0 +1,24 @@
+(node:5684) [MONGODB DRIVER] Warning: Current Server Discovery and Monitoring engine is deprecated, and will be removed in a future version. To use the new Server Discover and Monitoring engine, pass option { useUnifiedTopology: true } to the MongoClient constructor.
+(node:5684) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(node:5684) UnhandledPromiseRejectionWarning: MongoNetworkError: failed to connect to server [172.16.16.200:27017] on first connect [MongoNetworkTimeoutError: connection timed out
+    at connectionFailureError (D:\Andisheh\api\node_modules\mongodb\lib\core\connection\connect.js:342:14)
+    at Socket.<anonymous> (D:\Andisheh\api\node_modules\mongodb\lib\core\connection\connect.js:310:16)
+    at Object.onceWrapper (events.js:420:28)
+    at Socket.emit (events.js:314:20)
+    at Socket._onTimeout (net.js:483:8)
+    at listOnTimeout (internal/timers.js:554:17)
+    at processTimers (internal/timers.js:497:7)]
+    at Pool.<anonymous> (D:\Andisheh\api\node_modules\mongodb\lib\core\topologies\server.js:438:11)
+    at Pool.emit (events.js:314:20)
+    at D:\Andisheh\api\node_modules\mongodb\lib\core\connection\pool.js:562:14
+    at D:\Andisheh\api\node_modules\mongodb\lib\core\connection\pool.js:995:11
+    at D:\Andisheh\api\node_modules\mongodb\lib\core\connection\connect.js:32:7
+    at callback (D:\Andisheh\api\node_modules\mongodb\lib\core\connection\connect.js:280:5)
+    at Socket.<anonymous> (D:\Andisheh\api\node_modules\mongodb\lib\core\connection\connect.js:310:7)
+    at Object.onceWrapper (events.js:420:28)
+    at Socket.emit (events.js:314:20)
+    at Socket._onTimeout (net.js:483:8)
+    at listOnTimeout (internal/timers.js:554:17)
+    at processTimers (internal/timers.js:497:7)
+(node:5684) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 1)
+(node:5684) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.

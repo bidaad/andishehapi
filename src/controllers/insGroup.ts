@@ -10,7 +10,6 @@ export class InsGroupController extends RESTDataSource {
 
   async getInsGroups() {
     const data = await InsGroup.find();
-    //console.log('hhhhhhhh')
     return data
   }
 

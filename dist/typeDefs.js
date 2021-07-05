@@ -12,7 +12,28 @@ const typeDefs = apollo_server_1.gql `
     isActive: Boolean
     createDate: String
     lastLoginDate: String
+    role: String
+    zone: String
+    accessGroups: [String]
+    classification: String
+
   }
+
+
+  type LoginResult {
+    id: String!
+    account_id: Int
+    fullName: String
+    username: String
+    password: String
+    isActive: Boolean
+    createDate: String
+    lastLoginDate: String
+    role: String
+    zone: String
+    resourceAccesses: [ResourceAccess]
+  }
+
 
   type InsGroup{
     id: String!
@@ -21,16 +42,49 @@ const typeDefs = apollo_server_1.gql `
     parentCode: Int!
   }
 
+  type FileModel{
+    fileName: String
+    originalFileName: String
+  }
+
+  input FileModelInput{
+    fileName: String
+    originalFileName: String
+  }
+
+  type Comment{
+    id: String,
+    desc: String,
+    creatorId: String,
+    creatorName: String,
+    persianCreateDate: String,
+  }
+
+  input CommentInput{
+    desc: String,
+    creatorId: String,
+    persianCreateDate: String,
+  }
+
   type Article {
     id: String!
     title: String
     description: String
     status: String
     createDate: String,
+    persianCreateDate: String,
     creatorId: Int,
     tags: [String],
     insGroupCodes: [String]
-    files: [String]
+    files: [FileModel]
+    zones: [String]
+    creatorName: String
+
+    author: String,
+    source: String,
+    articleDate: String,
+    classification: Int
+    comments: [Comment]
   }
 
   type ActionResult {
@@ -42,7 +96,19 @@ const typeDefs = apollo_server_1.gql `
     id: String!
     title: String
   }
+
+  type Classification{
+    id: String!
+    title: String
+    rank: Int
+  }
+
   type ArticleTag{
+    id: String!
+    title: String
+  }
+
+  type Zone{
     id: String!
     title: String
   }
@@ -52,6 +118,7 @@ const typeDefs = apollo_server_1.gql `
       mimetype: String
       encoding: String
       url: String
+      originalFileName: String
     }
 
   type Company{
@@ -193,6 +260,21 @@ const typeDefs = apollo_server_1.gql `
     data: [Account]
   }
 
+  type AccessGroupResult{
+    result: Boolean
+    message: String
+    totalCount: Int
+    data: [AccessGroup]
+  }
+
+  type ResourceResult{
+    result: Boolean
+    message: String
+    totalCount: Int
+    data: [Resource]
+  }
+
+  
   type ArticleTagResult{
     result: Boolean
     message: String
@@ -227,7 +309,43 @@ const typeDefs = apollo_server_1.gql `
     articleCount: Int
   }
 
+  type Resource{
+    id: String
+    title: String
+    engTitle: String
+    path: String
+  }
 
+  type AccessGroup{
+    id: String!
+    title: String
+    resourceAccesses: [ResourceAccess]
+  }
+
+  input ResoucesInput{
+    title: String
+    engTitle: String
+  }
+
+  type ResourceAccess{
+    resource: Resource
+    read: Boolean
+    write: Boolean
+    delete: Boolean
+  }
+
+  input ResourceInput{
+    id: String
+    title: String
+    engTitle: String
+  }
+
+  input ResourcesAccessInput{
+    resource: ResourceInput
+    read: Boolean
+    write: Boolean
+    delete: Boolean
+  }
 
   type Query {
     #accounts
@@ -237,10 +355,14 @@ const typeDefs = apollo_server_1.gql `
     
     #articles
     getArticle(Id: String): Article
-    articles(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String): ArticleResult
+    articles(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String, zone: String): ArticleResult
     articleStatuses: [ArticleStatus]
+    zones: [Zone]
+    getZone(Id: String): Zone
     articleCountsByDate: [ArticleStat]
     getArticleStatus(Id: String): ArticleStatus
+    advancedSearchArticle(pageNo: Int, pageSize: Int,title: String, description: String, source: String, author: String,
+        articleStatus: String, selectedZone: String, articleFromDate: String, articleToDate: String): ArticleResult
 
     #tags
     articleTags(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String): ArticleTagResult
@@ -249,14 +371,26 @@ const typeDefs = apollo_server_1.gql `
 
     #insGroups
     getInsGroups: [InsGroup]
+
+    # Access Groups and Resources
+    getAccessGroup(Id: String): AccessGroup
+    accessGroups(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String): AccessGroupResult
+
+    getResource(Id: String): Resource
+    resources(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String): ResourceResult
+  
+    #Hardcodes
+    classifications: [Classification]
+    getClassification(Id: String): Classification
+
   }
 
   type Mutation {
     createAccount(email: String, password: String, mobile: String): Account!
     createTicket(title: String, description: String): Ticket!
-    login(username: String, password: String): Account
-    upsertAccount(
-      id: ID , username: String, fullName: String, password: String, savedPassword: String, isActive: Boolean, 
+    login(username: String, password: String): LoginResult
+    upsertAccount(id: ID , username: String, fullName: String, password: String, 
+    savedPassword: String, isActive: Boolean, role: String, zone: String, accessGroups: [String], classification: String
        ): Account
     logout:Boolean
     changePassword(account_id: Int, oldPassword: String, newPassword: String): ActionResult
@@ -269,15 +403,18 @@ const typeDefs = apollo_server_1.gql `
       pictures: [CompanyPictureInput]
        ): Company
 
-
     upsertArticle(
       id: String , title: String, description: String, status: String, tags: [String], insGroupCodes: [String],
-      files: [String]
+      files: [FileModelInput], zones: [String], creatorName: String, author: String, source: String, 
+      articleDate: String, classification: Int
       ): Article
     deleteArticle(id: String): String
     upsertArticleStatus(id: String , title: String): ArticleTag
     deleteArticleStatus(id: String): String
+    addComment(articleId: String, desc: String): Comment
 
+    upsertZone(id: String , title: String): ArticleTag
+    deleteZone(id: String): String
 
     createJob(company_id: String, data: Job): Boolean
     
@@ -287,7 +424,15 @@ const typeDefs = apollo_server_1.gql `
     singleUpload(id: String, entityType: String, file: FileUpload!): UploadedFileResponse
 
     saveInsGroups(data: [InsGroupInput]): Boolean
-    
+
+    upsertAccessGroup(id: String, title: String, resourceAccesses:[ResourcesAccessInput]): AccessGroup
+    upsertResource(id: String, title: String, engTitle:String, path: String): Resource
+    deleteAccessGroup(id: String): String
+
+    #Hardcodes
+    upsertClassification(id: String , title: String, rank:Int): ArticleTag
+    deleteClassification(id: String): String
+
   }
 `;
 module.exports = typeDefs;

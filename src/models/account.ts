@@ -9,6 +9,10 @@ const Account = mongoose.model("Account", {
     isActive: Boolean,
     lastLoginDate: String,
     createDate: String,
+    role: String,
+    zone: String,
+    accessGroups: [String],
+    classification: Number
   });
 
 

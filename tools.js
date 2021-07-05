@@ -42,7 +42,6 @@ sendMEssage = (token, toCellphone, smsMessage) => {
         }
     )
         .then((response) => {
-            console.log(response.data.IsSuccessful);
             const sqlQuery = `insert into SMSLog (ToNumber,SMSText,SendDate,HCSMSOperatorCode, resultToken) values
             ('${toCellphone}',N'${smsMessage}',getdate(),1, '${response.data.BatchKey}' )
             `;
@@ -74,10 +73,8 @@ sendEmail = (to, subject, mailBody) => {
 
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
-                console.log(error);
                 return false;
             } else {
-                console.log('Email sent: ' + info.response);
                 return true;
             }
         });

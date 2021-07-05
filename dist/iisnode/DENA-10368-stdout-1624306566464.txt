@@ -1,0 +1,87 @@
+🚀 Server ready at http://localhost:4000/graphql
+zone= null
+zone= null
+zone= null
+zone= منطقه سه
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= منطقه سه
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= null
+{
+  tags: [ 'سوریه' ],
+  files: [],
+  insGroupCodes: [ '6', '2' ],
+  zones: [ 'منطقه سه' ],
+  _id: 60c4a910d6439e1bb8a23c9f,
+  __v: 0,
+  createDate: 'Sat Jun 12 2021 17:01:12 GMT+0430 (Iran Daylight Time)',
+  creatorId: null,
+  description: 'شسیبیسبیسبیس',
+  status: 'وضعیت سه',
+  title: 'مقاله مرتبط با جنگ سوریه',
+  persianCreateDate: '1400/03/26'
+}
+zone= منطقه سه
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= null
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= null
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]

@@ -1,0 +1,28 @@
+🚀 Server ready at http://localhost:4000/graphql
+zone= undefined
+[
+  { _id: '1400/04/01', articleCount: 1 },
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= null
+{
+  tags: [],
+  files: [],
+  insGroupCodes: null,
+  zones: [ 'منطقه یک', 'منطقه دو' ],
+  _id: 60d0ddf7fc41e424a0ba9cf6,
+  __v: 0,
+  createDate: 'Mon Jun 21 2021 23:14:07 GMT+0430 (Iran Daylight Time)',
+  creatorId: null,
+  creatortName: 'Alireza',
+  description: 'aaa',
+  persianCreateDate: '1400/03/31',
+  status: 'وضعیت یک',
+  title: 'سیاست خارجی بایدن'
+}
+zone= null

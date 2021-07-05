@@ -7,6 +7,8 @@ const tickets_1 = require("./controllers/tickets");
 const company_1 = require("./controllers/company");
 const article_1 = require("./controllers/article");
 const insGroup_1 = require("./controllers/insGroup");
+const accessGroup_1 = require("./controllers/accessGroup");
+const hardcode_1 = require("./controllers/hardcode");
 class MainConfig extends apollo_datasource_rest_1.RESTDataSource {
     constructor() {
         super();
@@ -26,5 +28,7 @@ const dataSources = ({ req, res }) => ({
     companyController: new company_1.CompanyController(),
     articleController: new article_1.ArticleController(),
     insGroupController: new insGroup_1.InsGroupController(),
+    accessGroupController: new accessGroup_1.AccessGroupsController(),
+    hardcodeController: new hardcode_1.HardCodeController(),
 });
 exports.dataSources = dataSources;

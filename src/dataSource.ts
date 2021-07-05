@@ -5,6 +5,8 @@ import { CompanyController } from './controllers/company';
 import { JobseekerController } from './controllers/jobseeker';
 import { ArticleController } from './controllers/article';
 import { InsGroupController } from './controllers/insGroup';
+import { AccessGroupsController } from './controllers/accessGroup';
+import { HardCodeController } from './controllers/hardcode';
 
 export class MainConfig extends RESTDataSource {
   account_id: number;
@@ -29,5 +31,7 @@ export const dataSources = ({req, res}:any) => ({
   companyController: new CompanyController(),
   articleController: new ArticleController(),
   insGroupController: new InsGroupController(),
+  accessGroupController: new AccessGroupsController(),  
+  hardcodeController: new HardCodeController(),
 
 })

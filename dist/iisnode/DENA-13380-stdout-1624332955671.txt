@@ -1,0 +1,40 @@
+🚀 Server ready at http://localhost:4000/graphql
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= منطقه سه
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= undefined
+zone= منطقه سه
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]
+zone= منطقه سه
+zone= undefined
+[
+  { _id: '1400/03/31', articleCount: 4 },
+  { _id: '1400/03/30', articleCount: 1 },
+  { _id: '1400/03/27', articleCount: 5 },
+  { _id: '1400/03/26', articleCount: 2 },
+  { _id: '1400/03/25', articleCount: 1 },
+  { _id: '1400/03/24', articleCount: 1 }
+]

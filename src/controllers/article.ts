@@ -1,23 +1,57 @@
 import { RequestOptions, RESTDataSource } from 'apollo-datasource-rest'
 import { sign } from 'jsonwebtoken'
 import { ACCESS_TOKEN_SECRET } from "../config";
+import { correctPersian } from '../helper/utils';
+
+export interface Article {
+  _id?: string,
+  id?: string,
+  title: string,
+  description: string,
+  tags: string[],
+  status: string,
+  createDate?: Date,
+  files: String[],
+  insGroupCodes: Number[],
+  creatorId?: number,
+  persianCreateDate?: string,
+  zones: String[]
+  creatorName?: string
+  source?: string
+  author: string
+  articleDate: string
+  classification: string
+  comments?: Comment[]
+}
+
+interface Comment {
+  id: string;
+  desc: string,
+  creatorId: string,
+  persianCreateDate: string,
+  creatorName: string,
+
+}
+
 
 const getCurrentPersianDate = () => {
   var moment = require('jalali-moment');
   return moment().locale('fa').format('YYYY/MM/DD');
-  
+
 }
 
 const uuid = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
   });
 }
 
 const Article = require('../models/article');
 const ArticleStatus = require('../models/articleStatus');
 const ArticleTag = require('../models/articleTags');
+const Zone = require('../models/zone');
+const Account = require('../models/account');
 
 var ObjectId = require('mongoose').Types.ObjectId;
 
@@ -29,7 +63,6 @@ export class ArticleController extends RESTDataSource {
 
   async getArticle(Id: string) {
     const data = await Article.findById(Id);
-    //console.log(data);
     console.log(data);
 
     return data
@@ -40,6 +73,11 @@ export class ArticleController extends RESTDataSource {
     return data
   }
 
+  async getZones() {
+    const data = await Zone.find({});
+
+    return data
+  }
   async getTagArticles(pageNo: Number, pageSize: Number, tagTitle: string) {
     const data = await Article.find({ tags: tagTitle });
 
@@ -53,26 +91,136 @@ export class ArticleController extends RESTDataSource {
     return data
   }
 
-  async getArticles(pageNo: number, pageSize: number, filterText: String, sortType: String, sortkey: String) {
-    const data = await Article.find({
-      $or: [
-        { title: { $regex: '.*' + filterText + '.*' } },
-        { description: { $regex: '.*' + filterText + '.*' } },
-      ]
-    })
+  async getArticles(pageNo: number, pageSize: number, filterText: String, sortType: String, sortkey: String, zone: String, insGroupCode: number,
+    dataSources: any) {
+
+    var data;
+    var totalCount;
+
+    const account_id = dataSources.req.account_id;
+    const classification = dataSources.req.classification;
+    console.log(insGroupCode);
+
+    console.log('account_id=' + dataSources.req.account_id);
+    //    console.log(dataSources.req.classification);
+
+    var query: any = { $or: [], $and: [{}] };;
+    query.$or.push({
+      creatorId: { $eq: account_id }
+    });
+    query.$or.push({
+      classification: { $lte: classification }
+    });
+
+
+    if (insGroupCode != 0)
+      query.$and.push({
+        insGroupCodes: { $in: insGroupCode }
+      });
+
+
+    data = await Article.find(query)
+      .sort({ 'createDate': -1 })
+      .skip(pageNo > 0 ? ((pageNo - 1) * pageSize) : 0)
+      .limit(pageSize)
+      ;
+    totalCount = await Article.find(query).count();
+
+    return { result: true, message: '', totalCount: totalCount, data: data }
+  }
+
+
+  async advancedSearchArticle(pageNo: number, pageSize: number, title: string, description: string,
+    source: string, author: string,
+    articleStatus: string, selectedZone: string, articleFromDate: string, articleToDate: string, tags: string[]) {
+
+    var data;
+    var totalCount;
+
+    var query: any = { $and: [{ title: { $regex: '.*' + '' + '.*' } }] };
+    if (title !== '') {
+      const titleArray = title.split(' ')
+      for (let i = 0; i < titleArray.length; i++) {
+        const element = titleArray[i];
+        console.log('1' + element);
+        query.$and.push({
+          title: { $regex: '.*' + element + '.*' }
+        });
+      }
+      // query.$and.push({
+      //   title: { $regex: '.*' + title + '.*' }
+      // });
+    }
+    if (description !== '') {
+      const descriptionArray = description.split(' ')
+      for (let i = 0; i < descriptionArray.length; i++) {
+        const element = descriptionArray[i];
+        console.log(element);
+
+        query.$and.push({
+          description: { $regex: '.*' + element + '.*' }
+        });
+      }
+
+
+    }
+
+    if (source !== '')
+      query.$and.push({
+        source: { $regex: '.*' + source + '.*' }
+      });
+
+    if (author !== '')
+      query.$and.push({
+        author: { $regex: '.*' + author + '.*' }
+      });
+
+    if (articleStatus !== '')
+      query.$and.push({
+        status: articleStatus
+      });
+    if (selectedZone !== '') {
+      query.$and.push({
+        zones: { $in: selectedZone }
+      });
+    }
+    if (articleFromDate !== '') {
+      query.$and.push({
+        articleDate: { $gte: articleFromDate }
+      });
+    }
+    if (articleToDate !== '') {
+      query.$and.push({
+        articleDate: { $lte: articleToDate }
+      });
+    }
+
+    if (tags.length > 0) {
+      for (let i = 0; i < tags.length; i++) {
+        const curTag = tags[i];
+        query.$and.push({
+          tags: { $in: curTag }
+        });
+      }
+
+    }
+
+
+    data = await Article.find(query)
+      .sort({ persianCreateDate: -1 })
       .skip(pageNo > 0 ? ((pageNo - 1) * pageSize) : 0)
       .limit(pageSize)
       ;
 
-    const totalCount = await Article.find().count();
+    totalCount = await Article.find(query).count();
 
 
-    //console.log(data)
+
     return { result: true, message: '', totalCount: totalCount, data: data }
   }
 
   async getArticlesStatuses() {
-    const data = await ArticleStatus.find({} );
+    const data = await ArticleStatus.find({});
 
     return data
   }
@@ -113,30 +261,43 @@ export class ArticleController extends RESTDataSource {
     return article;
   }
 
-  async upsertArticle(id: string, title: string, description: string, status: string, tags: string[], insGroupCodes: Number[], files: String[],
+  async upsertArticle(id: string, title: string, description: string, status: string, tags: string[],
+    insGroupCodes: Number[], files: String[], zones: String[], creatorName: string,
+    author: string, source: string, articleDate: string, classification: string,
     dataSources: any) {
-    const createDate = new Date().toString();
+
+
+    console.log(dataSources.req.account_id);
+
+    const createDate = new Date();//.toString();
     const strPersianCreateDate = getCurrentPersianDate();
-    const obj = ({
+    const obj: Article = {
       id: id,
-      title: title,
-      description: description,
+      title: correctPersian(title),
+      description: correctPersian(description),
       status: status,
       createDate: createDate,
       persianCreateDate: strPersianCreateDate,
       creatorId: dataSources.req.account_id,
       insGroupCodes: insGroupCodes,
       tags: tags,
-      files: files
-    });
-    console.log('account id=', dataSources.req.account_id);
+      files: files,
+      zones: zones,
+      creatorName: creatorName,
+      classification: classification,
+
+      author: author,
+      source: source,
+      articleDate: articleDate,
+
+    };
 
     if (id !== null) {
-      console.log('is update');
 
-      //delete obj.createDate
+      delete obj.createDate
       delete obj.creatorId
-      //delete obj.persianCreateDate
+      delete obj.persianCreateDate
+      delete obj.creatorName
     }
 
     const filter = { _id: new ObjectId(id) }
@@ -162,16 +323,63 @@ export class ArticleController extends RESTDataSource {
           title: tags[i],
         });
         await newTag.save();
-        console.log('new tag saved' + curTag);
 
       }
     }
 
 
-    console.log('saved');
-    console.log(upsertedObj);
 
     return upsertedObj;
+  }
+
+
+  async addComment(articleId: string, desc: string,
+    dataSources: any) {
+    const strPersianCreateDate = getCurrentPersianDate();
+    const data = await Article.findById(articleId);
+    //console.log('id=' + dataSources.req);
+
+    const user = await Account.findOne({ account_id: dataSources.req.account_id });
+    const newComment: Comment = {
+      id: Math.random().toString(),
+      desc: desc,
+      creatorId: dataSources.req.account_id,
+      persianCreateDate: strPersianCreateDate,
+      creatorName: user.fullName
+    }
+    var currentComments = data.comments;
+    currentComments.push(newComment)
+
+    data.comments = currentComments;
+    await data.save();
+
+    return newComment;
+  }
+
+  async deleteComment(articleId: string, commentId: string,
+    dataSources: any) {
+
+    try {
+      const data = await Article.findById(articleId);
+      var comments = data.comments;
+      data.comments = comments.filter((item: any) => item.id !== commentId)
+
+      const filter = { _id: new ObjectId(articleId) }
+      const upsertedObj = await Article.findOneAndUpdate(
+        filter,
+        data,
+        {
+          new: true, // Always returning updated work experiences.
+          upsert: false, // By setting this true, it will create if it doesn't exist
+          projection: {}, // without return _id and __v
+        }
+      )
+
+      return commentId;
+    }
+    catch {
+      return null;
+    }
   }
 
 
@@ -223,7 +431,6 @@ export class ArticleController extends RESTDataSource {
     const { createWriteStream } = require("fs");
     // Do work 💪
 
-    console.log(path.join("", "../uploads/", filename));
 
     const fileExtension = filename.split('.').pop();
     const newFileFullName = uuid() + '.' + fileExtension;
@@ -245,9 +452,9 @@ export class ArticleController extends RESTDataSource {
           const data = await Article.findById(id);
           var files = data.files;
           if (files === undefined)
-            files = [newFileFullName]
+            files = [{ fileName: newFileFullName, originalFileName: filename }]
           else
-            files.push(newFileFullName);
+            files.push({ fileName: newFileFullName, originalFileName: filename });
           data.files = files;
           await data.save();
 
@@ -259,7 +466,7 @@ export class ArticleController extends RESTDataSource {
     }
     )
 
-    return { filename: newFileFullName, mimetype, encoding, url: '' }
+    return { filename: newFileFullName, mimetype, encoding, url: '', originalFileName: filename }
 
   }
 
@@ -292,17 +499,15 @@ export class ArticleController extends RESTDataSource {
       //           "parentId": { "$first": "$parentId"}
       //       }
       //   }
-    //];
-    
-    //db.keyword.aggregate(pipeline)
+      //];
 
-      console.log(data);
+      //db.keyword.aggregate(pipeline)
+
 
 
       return data;
     }
     catch (err) {
-      console.log(err);
 
       return null;
     }
@@ -333,6 +538,28 @@ export class ArticleController extends RESTDataSource {
     return upsertedObj;
   }
 
+  async upsertZone(id: string, title: string,
+    dataSources: any) {
+
+    const obj = ({
+      id: id,
+      title: title,
+    });
+
+    const filter = { _id: new ObjectId(id) }
+    const upsertedObj = await Zone.findOneAndUpdate(
+      filter,
+      obj,
+      {
+        new: true, // Always returning updated work experiences.
+        upsert: true, // By setting this true, it will create if it doesn't exist
+        projection: {}, // without return _id and __v
+      }
+    )
+
+    return upsertedObj;
+  }
+
   async deleteArticleStatus(id: string) {
     try {
       const filter = { _id: new ObjectId(id) }
@@ -349,8 +576,30 @@ export class ArticleController extends RESTDataSource {
 
   }
 
+  async deleteZone(id: string) {
+    try {
+      const filter = { _id: new ObjectId(id) }
+      const upsertedObj = await Zone.find(
+        filter,
+      ).remove()
+
+      return id;
+    }
+    catch (err) {
+      return null;
+    }
+
+  }
+
+  async getZone(Id: string) {
+    const data = await Zone.findById(Id);
+    return data
+  }
+
 
 }
+
+
 
 
 

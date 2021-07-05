@@ -10,7 +10,6 @@ class InsGroupController extends apollo_datasource_rest_1.RESTDataSource {
     }
     async getInsGroups() {
         const data = await InsGroup.find();
-        //console.log('hhhhhhhh')
         return data;
     }
     async save(insGroupsArray) {

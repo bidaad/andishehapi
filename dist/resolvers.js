@@ -4,8 +4,7 @@ const resolvers = {
     //FileUpload: GraphQLUpload,
     Query: {
         me: async (_, res, dataSources) => {
-            console.log(dataSources.req);
-            //console.log('me iiiddd=' + dataSources.req.account_id);
+            //console.log(dataSources.req);
             if (!dataSources.req.account_id)
                 return null;
             return dataSources.accountController.getCurrentAccount(dataSources.req.account_id);
@@ -23,8 +22,12 @@ const resolvers = {
             const data = dataSources.articleController.getArticle(Id);
             return data;
         },
-        articles: async (_, { pageNo, pageSize, filterText, sortType, sortkey }, dataSources) => {
-            const data = dataSources.articleController.getArticles(pageNo, pageSize, filterText, sortType, sortkey);
+        articles: async (_, { pageNo, pageSize, filterText, sortType, sortkey, zone }, dataSources) => {
+            const data = dataSources.articleController.getArticles(pageNo, pageSize, filterText, sortType, sortkey, zone);
+            return data;
+        },
+        advancedSearchArticle: async (_, { pageNo, pageSize, title, description, source, author, articleStatus, selectedZone, articleFromDate, articleToDate }, dataSources) => {
+            const data = dataSources.articleController.advancedSearchArticle(pageNo, pageSize, title, description, source, author, articleStatus, selectedZone, articleFromDate, articleToDate, dataSources);
             return data;
         },
         articleStatuses: async (_, __, dataSources) => {
@@ -37,6 +40,14 @@ const resolvers = {
         },
         getArticleStatus: async (_, { Id }, dataSources) => {
             const data = dataSources.articleController.getArticleStatus(Id);
+            return data;
+        },
+        zones: async (_, __, dataSources) => {
+            const data = dataSources.articleController.getZones();
+            return data;
+        },
+        getZone: async (_, { Id }, dataSources) => {
+            const data = dataSources.articleController.getZone(Id);
             return data;
         },
         //tags
@@ -54,6 +65,32 @@ const resolvers = {
         },
         getInsGroups: async (_, res, dataSources) => {
             return dataSources.insGroupController.getInsGroups();
+        },
+        //Access Groups and Resources
+        getAccessGroup: async (_, { Id }, dataSources) => {
+            const data = dataSources.accessGroupController.getAccessGroup(Id);
+            return data;
+        },
+        accessGroups: async (_, { pageNo, pageSize, filterText, sortType, sortkey }, dataSources) => {
+            const data = dataSources.accessGroupController.getAccessGroups(pageNo, pageSize, filterText, sortType, sortkey, dataSources);
+            return data;
+        },
+        getResource: async (_, { Id }, dataSources) => {
+            const data = dataSources.accessGroupController.getResource(Id);
+            return data;
+        },
+        resources: async (_, { pageNo, pageSize, filterText, sortType, sortkey }, dataSources) => {
+            const data = dataSources.accessGroupController.getResources(pageNo, pageSize, filterText, sortType, sortkey, dataSources);
+            return data;
+        },
+        //Hardcodes
+        classifications: async (_, __, dataSources) => {
+            const data = dataSources.hardcodeController.getClassifications();
+            return data;
+        },
+        getClassification: async (_, { Id }, dataSources) => {
+            const data = dataSources.hardcodeController.getClassification(Id);
+            return data;
         },
     },
     Mutation: {
@@ -73,8 +110,8 @@ const resolvers = {
             const data = dataSources.accountController.createAccount(email, password, mobile);
             return data;
         },
-        upsertAccount: async (_, { id, username, fullName, password, savedPassword, isActive }, dataSources) => {
-            const data = dataSources.accountController.upsertAccount(id, username, fullName, password, savedPassword, isActive, dataSources);
+        upsertAccount: async (_, { id, username, fullName, password, savedPassword, isActive, role, zone, accessGroups, classification }, dataSources) => {
+            const data = dataSources.accountController.upsertAccount(id, username, fullName, password, savedPassword, isActive, role, zone, accessGroups, classification, dataSources);
             return data;
         },
         deleteAccount: async (_, { id }, dataSources) => {
@@ -93,9 +130,12 @@ const resolvers = {
             const job = dataSources.companyController.createJob(company_id, data, dataSources);
             return job;
         },
-        upsertArticle: async (_, { id, title, description, status, tags, insGroupCodes, files }, dataSources) => {
-            //console.log('iiiddd=' + dataSources.req.account_id);
-            const data = dataSources.articleController.upsertArticle(id, title, description, status, tags, insGroupCodes, files, dataSources);
+        upsertArticle: async (_, { id, title, description, status, tags, insGroupCodes, files, zones, creatorName, author, source, articleDate, classification }, dataSources) => {
+            const data = dataSources.articleController.upsertArticle(id, title, description, status, tags, insGroupCodes, files, zones, creatorName, author, source, articleDate, classification, dataSources);
+            return data;
+        },
+        addComment: async (_, { articleId, desc }, dataSources) => {
+            const data = dataSources.articleController.addComment(articleId, desc, dataSources);
             return data;
         },
         deleteArticle: async (_, { id }, dataSources) => {
@@ -108,6 +148,14 @@ const resolvers = {
         },
         deleteArticleStatus: async (_, { id }, dataSources) => {
             const data = dataSources.articleController.deleteArticleStatus(id, dataSources);
+            return data;
+        },
+        upsertZone: async (_, { id, title }, dataSources) => {
+            const data = dataSources.articleController.upsertZone(id, title, dataSources);
+            return data;
+        },
+        deleteZone: async (_, { id }, dataSources) => {
+            const data = dataSources.articleController.deleteZone(id, dataSources);
             return data;
         },
         //tags
@@ -126,6 +174,28 @@ const resolvers = {
         saveInsGroups: async (_, { data }, dataSources) => {
             const result = dataSources.insGroupController.save(data, dataSources);
             return result;
+        },
+        // Access Groups
+        upsertAccessGroup: async (_, { id, title, resourceAccesses }, dataSources) => {
+            const data = dataSources.accessGroupController.upsertAccessGroup(id, title, resourceAccesses, dataSources);
+            return data;
+        },
+        deleteAccessGroup: async (_, { id }, dataSources) => {
+            const data = dataSources.accessGroupController.deleteAccessGroup(id, dataSources);
+            return data;
+        },
+        upsertResource: async (_, { id, title, engTitle, path }, dataSources) => {
+            const data = dataSources.accessGroupController.upsertResource(id, title, engTitle, path, dataSources);
+            return data;
+        },
+        //Hardcodes
+        upsertClassification: async (_, { id, title, rank }, dataSources) => {
+            const data = dataSources.hardcodeController.upsertClassification(id, title, rank, dataSources);
+            return data;
+        },
+        deleteClassification: async (_, { id }, dataSources) => {
+            const data = dataSources.hardcodeController.deleteClassification(id, dataSources);
+            return data;
         },
     }
 };
