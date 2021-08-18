@@ -14,7 +14,8 @@ const corsOptions = {
   origin: [
     "http://172.16.16.202",
     "http://172.16.16.202:3000",
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://127.0.0.1:5000"
   ],
   credentials: true
 }
@@ -61,7 +62,7 @@ const startServer = async () => {
       }
 
     } catch (err) {
-      console.log(err);
+      //console.log(err);
       
     }
     next();

@@ -22,6 +22,13 @@ export interface Article {
   articleDate: string
   classification: string
   comments?: Comment[]
+  articleType: string
+  changeLogs: ArticleLog[]
+}
+interface ArticleLog{
+  userFullName: string
+  userId: string
+  changeDate: Date
 }
 
 interface Comment {
@@ -48,7 +55,6 @@ const uuid = () => {
 }
 
 const Article = require('../models/article');
-const ArticleStatus = require('../models/articleStatus');
 const ArticleTag = require('../models/articleTags');
 const Zone = require('../models/zone');
 const Account = require('../models/account');
@@ -63,15 +69,11 @@ export class ArticleController extends RESTDataSource {
 
   async getArticle(Id: string) {
     const data = await Article.findById(Id);
-    console.log(data);
+    //console.log(data);
 
     return data
   }
 
-  async getArticleStatus(Id: string) {
-    const data = await ArticleStatus.findById(Id);
-    return data
-  }
 
   async getZones() {
     const data = await Zone.find({});
@@ -91,7 +93,7 @@ export class ArticleController extends RESTDataSource {
     return data
   }
 
-  async getArticles(pageNo: number, pageSize: number, filterText: String, sortType: String, sortkey: String, zone: String, insGroupCode: number,
+  async getArticles(pageNo: number, pageSize: number, filterText: String, sortType: String, sortkey: String, insGroupCode: number,
     dataSources: any) {
 
     var data;
@@ -99,9 +101,9 @@ export class ArticleController extends RESTDataSource {
 
     const account_id = dataSources.req.account_id;
     const classification = dataSources.req.classification;
-    console.log(insGroupCode);
+    //console.log(insGroupCode);
 
-    console.log('account_id=' + dataSources.req.account_id);
+    //console.log('account_id=' + dataSources.req.account_id);
     //    console.log(dataSources.req.classification);
 
     var query: any = { $or: [], $and: [{}] };;
@@ -132,17 +134,22 @@ export class ArticleController extends RESTDataSource {
 
   async advancedSearchArticle(pageNo: number, pageSize: number, title: string, description: string,
     source: string, author: string,
-    articleStatus: string, selectedZone: string, articleFromDate: string, articleToDate: string, tags: string[]) {
+    articleStatus: string, selectedZone: string, articleFromDate: string, articleToDate: string, 
+    tags: string[], selectedArticleType: string) {
 
     var data;
     var totalCount;
 
+    console.log('articleFromDate');
+    
+    console.log(articleFromDate);
+    
     var query: any = { $and: [{ title: { $regex: '.*' + '' + '.*' } }] };
     if (title !== '') {
       const titleArray = title.split(' ')
       for (let i = 0; i < titleArray.length; i++) {
         const element = titleArray[i];
-        console.log('1' + element);
+        //console.log('1' + element);
         query.$and.push({
           title: { $regex: '.*' + element + '.*' }
         });
@@ -155,7 +162,7 @@ export class ArticleController extends RESTDataSource {
       const descriptionArray = description.split(' ')
       for (let i = 0; i < descriptionArray.length; i++) {
         const element = descriptionArray[i];
-        console.log(element);
+      //  console.log(element);
 
         query.$and.push({
           description: { $regex: '.*' + element + '.*' }
@@ -205,6 +212,12 @@ export class ArticleController extends RESTDataSource {
 
     }
 
+  //console.log('selectedArticleType=', selectedArticleType);
+  
+    if (selectedArticleType !== '')
+      query.$and.push({
+        articleType: selectedArticleType
+      });
 
     data = await Article.find(query)
       .sort({ persianCreateDate: -1 })
@@ -219,11 +232,6 @@ export class ArticleController extends RESTDataSource {
     return { result: true, message: '', totalCount: totalCount, data: data }
   }
 
-  async getArticlesStatuses() {
-    const data = await ArticleStatus.find({});
-
-    return data
-  }
 
   async getArticlesTags(pageNo: number, pageSize: number, filterText: String, sortType: String, sortkey: String) {
     const data = await ArticleTag.find({
@@ -263,11 +271,11 @@ export class ArticleController extends RESTDataSource {
 
   async upsertArticle(id: string, title: string, description: string, status: string, tags: string[],
     insGroupCodes: Number[], files: String[], zones: String[], creatorName: string,
-    author: string, source: string, articleDate: string, classification: string,
+    author: string, source: string, articleDate: string, classification: string, articleType:string,
     dataSources: any) {
 
 
-    console.log(dataSources.req.account_id);
+   // console.log(dataSources.req.account_id);
 
     const createDate = new Date();//.toString();
     const strPersianCreateDate = getCurrentPersianDate();
@@ -289,7 +297,8 @@ export class ArticleController extends RESTDataSource {
       author: author,
       source: source,
       articleDate: articleDate,
-
+      articleType: articleType,
+      changeLogs: []
     };
 
     if (id !== null) {
@@ -301,6 +310,21 @@ export class ArticleController extends RESTDataSource {
     }
 
     const filter = { _id: new ObjectId(id) }
+
+    const curArticle = await Article.findOne(filter)
+    if(curArticle !== null)
+    {
+      var curChangeLog = curArticle.changeLogs;
+      const curUser = await Account.findOne({account_id: dataSources.req.account_id})
+      const newChangeLog = {
+        userFullName: curUser.fullName,
+        userId: dataSources.req.account_id,
+        changeDate: new Date()
+      }
+      const finalChangeLog = curChangeLog.concat(newChangeLog);
+      obj.changeLogs = finalChangeLog
+    }
+
     const upsertedObj = await Article.findOneAndUpdate(
       filter,
       obj,
@@ -515,28 +539,7 @@ export class ArticleController extends RESTDataSource {
   }
 
 
-  async upsertArticleStatus(id: string, title: string,
-    dataSources: any) {
 
-    const obj = ({
-      id: id,
-      title: title,
-
-    });
-
-    const filter = { _id: new ObjectId(id) }
-    const upsertedObj = await ArticleStatus.findOneAndUpdate(
-      filter,
-      obj,
-      {
-        new: true, // Always returning updated work experiences.
-        upsert: true, // By setting this true, it will create if it doesn't exist
-        projection: {}, // without return _id and __v
-      }
-    )
-
-    return upsertedObj;
-  }
 
   async upsertZone(id: string, title: string,
     dataSources: any) {
@@ -560,21 +563,6 @@ export class ArticleController extends RESTDataSource {
     return upsertedObj;
   }
 
-  async deleteArticleStatus(id: string) {
-    try {
-      const filter = { _id: new ObjectId(id) }
-      const upsertedObj = await ArticleStatus.find(
-        filter,
-
-      ).remove()
-
-      return id;
-    }
-    catch (err) {
-      return null;
-    }
-
-  }
 
   async deleteZone(id: string) {
     try {
@@ -596,6 +584,66 @@ export class ArticleController extends RESTDataSource {
     return data
   }
 
+
+  async getUserArticleCounts(fromDate: string, toDate: string, userIDs: number[]) {
+    try {
+      var data;
+      var totalCount;
+
+      var query: any = { $and: [ {creatorId: { $gte: 0 }}] };
+      
+      if (fromDate !== '') {
+        query.$and.push({
+          createDate: { $gte: new Date(fromDate) }
+        });
+      }
+      if (toDate !== '') {
+        query.$and.push({
+          createDate: { $lte: new Date(toDate) }
+        });
+      }
+
+      
+      if (userIDs.length > 0) {
+        query.$and.push({
+          creatorId: { $in: userIDs }
+        });
+      }
+  
+      //console.log(query);
+
+      // data = await UserLog.aggregate(query)
+      //   .sort({ logDate: -1 })
+      //   ;
+      data = await Article.aggregate([
+        {$match: query},
+        {$group:{_id:"$creatorId",ArticleCount:{$sum:1}}},
+        {$lookup:{from: "accounts",localField: "_id",foreignField: "account_id",as: "curUser"} },
+        {$project: {
+          "_id": 1,
+          "creatorId": 1,
+          "createDate": 1,
+          "ArticleCount": 1,
+          "curUser._id": 1,
+          "curUser.fullName": 1
+        }}
+      ]
+
+      )
+
+     // console.log(query);
+
+      totalCount = await Article.find(query).countDocuments();
+      return { result: true, message: '', totalCount: totalCount, data: data }
+
+    }
+    catch (err) {
+      console.log(err);
+      
+      return { result: false, message: 'بروز خطا' }
+    }
+
+  }
 
 }
 

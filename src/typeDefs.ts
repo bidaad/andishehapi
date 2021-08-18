@@ -2,8 +2,10 @@ import { gql, GraphQLUpload } from 'apollo-server'
 
 const typeDefs = gql`
   scalar FileUpload
+  scalar Date
+
   type Account {
-    id: String!
+    id: String
     account_id: Int
     fullName: String
     username: String
@@ -12,7 +14,7 @@ const typeDefs = gql`
     createDate: String
     lastLoginDate: String
     role: String
-    zone: String
+    zones: [String]
     accessGroups: [String]
     classification: Int
 
@@ -29,7 +31,7 @@ const typeDefs = gql`
     createDate: String
     lastLoginDate: String
     role: String
-    zone: String
+    zones: [String]
     resourceAccesses: [ResourceAccess]
   }
 
@@ -81,10 +83,18 @@ const typeDefs = gql`
 
     author: String,
     source: String,
-    articleDate: String,
+    articleDate: Date,
     classification: Int
     comments: [Comment]
+    articleType: String
+    changeLogs: [ArticleLog]
   }
+
+  type ArticleLog {
+      userFullName: String
+      userId: String
+      changeDate: Date
+    }
 
   type ActionResult {
     result: Boolean
@@ -92,6 +102,10 @@ const typeDefs = gql`
   }
 
   type ArticleStatus{
+    id: String!
+    title: String
+  }
+  type ArticleType{
     id: String!
     title: String
   }
@@ -244,6 +258,35 @@ const typeDefs = gql`
     masterLevel: String
   }
 
+ type UserLogResult{
+    userId: Int,
+    logDate: Date,
+    action: String,
+    curUser: [Account]
+
+ }
+
+ type UserArticleCountResult{
+    _id: Int,
+    ArticleCount: Int
+    curUser: [Account],
+
+ }
+
+  type ReportUserActivityResult{
+    result: Boolean
+    message: String
+    totalCount: Int
+    data: [UserLogResult]
+  }
+
+  type ReportUserArticleCount{
+    result: Boolean
+    message: String
+    totalCount: Int
+    data: [UserArticleCountResult]
+  }
+
 
   type ArticleResult{
     result: Boolean
@@ -354,14 +397,14 @@ const typeDefs = gql`
     
     #articles
     getArticle(Id: String): Article
-    articles(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String, zone: String, insGroupCode: Int): ArticleResult
-    articleStatuses: [ArticleStatus]
+    articles(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String, insGroupCode: Int): ArticleResult
     zones: [Zone]
     getZone(Id: String): Zone
     articleCountsByDate: [ArticleStat]
-    getArticleStatus(Id: String): ArticleStatus
+
     advancedSearchArticle(pageNo: Int, pageSize: Int,title: String, description: String, source: String, author: String,
-        articleStatus: String, selectedZone: String, articleFromDate: String, articleToDate: String, tags: [String]): ArticleResult
+        articleStatus: String, selectedZone: String, articleFromDate: String, articleToDate: String, tags: [String],
+        selectedArticleType: String): ArticleResult
 
     #tags
     articleTags(pageNo: Int, pageSize: Int, filterText: String, sortType: String, sortkey: String): ArticleTagResult
@@ -382,6 +425,15 @@ const typeDefs = gql`
     classifications: [Classification]
     getClassification(Id: String): Classification
 
+    articleStatuses: [ArticleStatus]
+    getArticleStatus(Id: String): ArticleStatus
+
+    articleTypes: [ArticleType]
+    getArticleType(Id: String): ArticleType
+
+    getUserActivities(fromDate: String, toDate: String, userIDs: [Int]): ReportUserActivityResult
+    getUserArticleCounts(fromDate: String, toDate: String, userIDs: [Int]): ReportUserArticleCount
+
   }
 
   type Mutation {
@@ -389,7 +441,7 @@ const typeDefs = gql`
     createTicket(title: String, description: String): Ticket!
     login(username: String, password: String): LoginResult
     upsertAccount(id: ID , username: String, fullName: String, password: String, 
-    savedPassword: String, isActive: Boolean, role: String, zone: String, accessGroups: [String], classification: Int
+    savedPassword: String, isActive: Boolean, role: String, zones: [String], accessGroups: [String], classification: Int
        ): Account
     logout:Boolean
     changePassword(account_id: Int, oldPassword: String, newPassword: String): ActionResult
@@ -405,11 +457,11 @@ const typeDefs = gql`
     upsertArticle(
       id: String , title: String, description: String, status: String, tags: [String], insGroupCodes: [String],
       files: [FileModelInput], zones: [String], creatorName: String, author: String, source: String, 
-      articleDate: String, classification: Int
+      articleDate: String, classification: Int, articleType: String
       ): Article
     deleteArticle(id: String): String
-    upsertArticleStatus(id: String , title: String): ArticleTag
-    deleteArticleStatus(id: String): String
+
+
     addComment(articleId: String, desc: String): Comment
     deleteComment(articleId: String, commentId: String): String
 
@@ -424,6 +476,7 @@ const typeDefs = gql`
     singleUpload(id: String, entityType: String, file: FileUpload!): UploadedFileResponse
 
     saveInsGroups(data: [InsGroupInput]): Boolean
+    updateInsGroupParent(code: Int, newParentCode: Int): Boolean
 
     upsertAccessGroup(id: String, title: String, resourceAccesses:[ResourcesAccessInput]): AccessGroup
     upsertResource(id: String, title: String, engTitle:String, path: String): Resource
@@ -432,6 +485,12 @@ const typeDefs = gql`
     #Hardcodes
     upsertClassification(id: String , title: String, rank:Int): ArticleTag
     deleteClassification(id: String): String
+
+    upsertArticleStatus(id: String , title: String): ArticleStatus
+    deleteArticleStatus(id: String): String
+
+    upsertArticleType(id: String , title: String): ArticleType
+    deleteArticleType(id: String): String
 
   }
 `

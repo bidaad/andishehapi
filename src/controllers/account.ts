@@ -2,11 +2,18 @@ import { RequestOptions, RESTDataSource } from 'apollo-datasource-rest'
 import { sign } from 'jsonwebtoken'
 import { ActionResult } from '../models/ActionResult'
 const Account = require('../models/account');
+const UserLog = require('../models/userLogs');
 const AccessGroup = require('../models/accessGroup');
 import { ACCESS_TOKEN_SECRET, SECRET_KEY_FOR_ENCRYPTION } from "../config";
 import { ResourceAccess } from '../models/accessGroup';
 var ObjectId = require('mongoose').Types.ObjectId;
 
+export interface UserLog {
+  userId: string,
+  logDate: string,
+  action: string;
+
+}
 
 export interface Account {
   username: string,
@@ -17,7 +24,7 @@ export interface Account {
   createDate?: string;
   lastLoginDate?: string;
   role: string;
-  zone: string;
+  zones: string[];
   accessGroups: string[];
   classification: string;
 
@@ -52,8 +59,8 @@ export class AccountController extends RESTDataSource {
 
   async getCurrentAccount(account_id: string) {
     const user = await Account.findOne({ account_id: account_id });
-    console.log(account_id);
-    
+    //console.log(account_id);
+
     return user
   }
 
@@ -77,7 +84,7 @@ export class AccountController extends RESTDataSource {
     const accessToken = sign({ account_id: user.account_id, classification: user.classification }, ACCESS_TOKEN_SECRET, { expiresIn: "7d" })
     dataSources.res.cookie('access-token', accessToken);
     //console.log(accessToken);
-    
+
     var userTotalResourceAccesses: ResourceAccess[] = []
     const groupIds = user.accessGroups;
     for (let i = 0; i < groupIds.length; i++) {
@@ -88,6 +95,11 @@ export class AccountController extends RESTDataSource {
         userTotalResourceAccesses.push(curResourceAccessList[j])
       }
     }
+
+    //Save user login log
+    const userLog = new UserLog({ userId: user.account_id, logDate: new Date(), action: 'ورود' });
+    await userLog.save();
+
     return {
       id: user.id,
       account_id: user.account_id,
@@ -98,7 +110,7 @@ export class AccountController extends RESTDataSource {
       createDate: user.createDate,
       lastLoginDate: user.lastLoginDateing,
       role: user.role,
-      zone: user.zone,
+      zones: user.zones,
       resourceAccesses: userTotalResourceAccesses,
       classification: user.classification,
     }
@@ -138,8 +150,8 @@ export class AccountController extends RESTDataSource {
     return { result: true, message: 'کلمه عبور با موفقیت تغییر کرد' } as ActionResult;
   }
 
-  async upsertAccount(id: string, username: string, fullName: string, password: string, 
-    savedPassword: string, isActive: boolean, role: string, zone: string, accessGroups: string[], classification: string,
+  async upsertAccount(id: string, username: string, fullName: string, password: string,
+    savedPassword: string, isActive: boolean, role: string, zones: string[], accessGroups: string[], classification: string,
     dataSources: any) {
 
     const createDate = new Date().toString();
@@ -156,7 +168,7 @@ export class AccountController extends RESTDataSource {
       createDate: createDate,
       lastLoginDate: '',
       role: role,
-      zone: zone,
+      zones: zones,
       accessGroups: accessGroups,
       classification: classification,
     };
@@ -198,5 +210,70 @@ export class AccountController extends RESTDataSource {
     }
 
   }
+
+  async getUserActivities(fromDate: string, toDate: string, userIDs: number[]) {
+    try {
+      var data;
+      var totalCount;
+
+      //console.log('fromDate');
+      //console.log(fromDate);
+      //console.log(fromDate.length);
+      
+
+      var query: any = { $and: [ {userId: { $gte: 0 }}] };
+      
+      if (fromDate !== '') {
+        query.$and.push({
+          logDate: { $gte: new Date(fromDate) }
+        });
+      }
+      if (toDate !== '') {
+        query.$and.push({
+          logDate: { $lte: new Date(toDate) }
+        });
+      }
+
+      //console.log(userIDs[0]);
+      
+      if (userIDs.length > 0) {
+        query.$and.push({
+          userId: { $in: userIDs }
+        });
+      }
+  
+      //console.log(query);
+
+      // data = await UserLog.aggregate(query)
+      //   .sort({ logDate: -1 })
+      //   ;
+      data = await UserLog.aggregate([
+        {$match: query},
+        {$lookup:{from: "accounts",localField: "userId",foreignField: "account_id",as: "curUser"} },
+        {$project: {
+          "_id": 1,
+          "userId": 1,
+          "logDate": 1,
+          "curUser._id": 1,
+          "curUser.fullName": 1
+        }}
+      ]
+
+      )
+
+      //console.log(query);
+
+      totalCount = await UserLog.find(query).countDocuments();
+      return { result: true, message: '', totalCount: totalCount, data: data }
+
+    }
+    catch (err) {
+      //console.log(err);
+      
+      return { result: false, message: 'بروز خطا' }
+    }
+
+  }
+
 
 }

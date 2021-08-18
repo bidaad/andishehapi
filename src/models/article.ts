@@ -15,9 +15,11 @@ const Article = mongoose.model("Article", {
     creatorName: String,
     author: String,
     source: String,
-    articleDate: String,
+    articleDate: Date,
     classification: Number,
-    comments: [Object]
+    comments: [Object],
+    articleType: String,
+    changeLogs: [Object]
   });
 
 

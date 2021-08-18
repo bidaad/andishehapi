@@ -25,7 +25,7 @@ class ArticleController extends apollo_datasource_rest_1.RESTDataSource {
     }
     async getArticle(Id) {
         const data = await Article.findById(Id);
-        console.log(data);
+        //console.log(data);
         return data;
     }
     async getArticleStatus(Id) {
@@ -47,7 +47,7 @@ class ArticleController extends apollo_datasource_rest_1.RESTDataSource {
     async getArticles(pageNo, pageSize, filterText, sortType, sortkey, zone) {
         var data;
         var totalCount;
-        console.log('zone=' + zone);
+        //console.log('zone=' + zone);
         if (zone !== null && zone !== '') {
             data = await Article.find({
                 $or: [
@@ -94,7 +94,7 @@ class ArticleController extends apollo_datasource_rest_1.RESTDataSource {
             const titleArray = title.split(' ');
             for (let i = 0; i < titleArray.length; i++) {
                 const element = titleArray[i];
-                console.log('1' + element);
+                //console.log('1' + element);
                 query.$and.push({
                     title: { $regex: '.*' + element + '.*' }
                 });
@@ -107,7 +107,7 @@ class ArticleController extends apollo_datasource_rest_1.RESTDataSource {
             const descriptionArray = description.split(' ');
             for (let i = 0; i < descriptionArray.length; i++) {
                 const element = descriptionArray[i];
-                console.log(element);
+                //console.log(element);
                 query.$and.push({
                     description: { $regex: '.*' + element + '.*' }
                 });
@@ -176,7 +176,7 @@ class ArticleController extends apollo_datasource_rest_1.RESTDataSource {
         return article;
     }
     async upsertArticle(id, title, description, status, tags, insGroupCodes, files, zones, creatorName, author, source, articleDate, classification, dataSources) {
-        console.log(dataSources.req.account_id);
+        //console.log(dataSources.req.account_id);
         const createDate = new Date().toString();
         const strPersianCreateDate = getCurrentPersianDate();
         const obj = {

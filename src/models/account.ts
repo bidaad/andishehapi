@@ -10,7 +10,7 @@ const Account = mongoose.model("Account", {
     lastLoginDate: String,
     createDate: String,
     role: String,
-    zone: String,
+    zones: [String],
     accessGroups: [String],
     classification: Number
   });

@@ -29,30 +29,24 @@ const resolvers: IResolvers = {
       const data = dataSources.articleController.getArticle(Id)
       return data
     },
-    articles: async (_, { pageNo, pageSize, filterText, sortType, sortkey, zone, insGroupCode }, dataSources) => {
+    articles: async (_, { pageNo, pageSize, filterText, sortType, sortkey,  insGroupCode }, dataSources) => {
 
-      const data = dataSources.articleController.getArticles(pageNo, pageSize, filterText, sortType, sortkey, zone, insGroupCode, dataSources)
+      const data = dataSources.articleController.getArticles(pageNo, pageSize, filterText, sortType, sortkey, insGroupCode, dataSources)
       return data
     },
 
-    advancedSearchArticle: async (_, { pageNo, pageSize, title,description,source,author,articleStatus,selectedZone,articleFromDate,articleToDate, tags }, dataSources) => {
-      const data = dataSources.articleController.advancedSearchArticle(pageNo, pageSize, title,description,source,author,articleStatus,selectedZone,articleFromDate,articleToDate, tags, dataSources)
+    advancedSearchArticle: async (_, { pageNo, pageSize, title,description,source,author,articleStatus,selectedZone,articleFromDate,articleToDate, tags, selectedArticleType }, dataSources) => {
+      const data = dataSources.articleController.advancedSearchArticle(pageNo, pageSize, title,description,source,author,articleStatus,selectedZone,articleFromDate,articleToDate, tags, selectedArticleType, dataSources)
       return data
     },
 
 
-    articleStatuses: async (_, __, dataSources) => {
-      const data = dataSources.articleController.getArticlesStatuses()
-      return data
-    },
+
     articleCountsByDate: async (_, { }, dataSources) => {
       const data = dataSources.articleController.articleCountsByDate()
       return data
     },
-    getArticleStatus: async (_, { Id }, dataSources) => {
-      const data = dataSources.articleController.getArticleStatus(Id)
-      return data
-    },
+
     zones: async (_, __, dataSources) => {
       const data = dataSources.articleController.getZones()
       return data
@@ -117,6 +111,33 @@ const resolvers: IResolvers = {
       return data
     },
 
+    articleStatuses: async (_, __, dataSources) => {
+      const data = dataSources.hardcodeController.getArticlesStatuses()
+      return data
+    },
+    getArticleStatus: async (_, { Id }, dataSources) => {
+      const data = dataSources.hardcodeController.getArticleStatus(Id)
+      return data
+    },
+
+    articleTypes: async (_, __, dataSources) => {
+      const data = dataSources.hardcodeController.getArticlesTypes()
+      return data
+    },
+    getArticleType: async (_, { Id }, dataSources) => {
+      const data = dataSources.hardcodeController.getArticleType(Id)
+      return data
+    },
+    getUserActivities: async (_, { fromDate, toDate, userIDs }, dataSources) => {
+      const data = dataSources.accountController.getUserActivities(fromDate, toDate, userIDs)
+      return data
+    },
+    getUserArticleCounts: async (_, { fromDate, toDate, userIDs }, dataSources) => {
+      const data = dataSources.articleController.getUserArticleCounts(fromDate, toDate, userIDs)
+      return data
+    },
+    
+
 
   },
   Mutation: {
@@ -138,9 +159,9 @@ const resolvers: IResolvers = {
       const data = dataSources.accountController.createAccount(email, password, mobile)
       return data
     },
-    upsertAccount: async (_, { id, username, fullName, password, savedPassword, isActive, role, zone, accessGroups ,classification}, dataSources) => {
+    upsertAccount: async (_, { id, username, fullName, password, savedPassword, isActive, role, zones, accessGroups ,classification}, dataSources) => {
 
-      const data = dataSources.accountController.upsertAccount(id, username, fullName, password, savedPassword, isActive, role, zone, accessGroups, classification, dataSources)
+      const data = dataSources.accountController.upsertAccount(id, username, fullName, password, savedPassword, isActive, role, zones, accessGroups, classification, dataSources)
       return data
     },
     deleteAccount: async (_, { id }, dataSources) => {
@@ -165,10 +186,10 @@ const resolvers: IResolvers = {
     },
 
     upsertArticle: async (_, { id, title, description, status, tags, insGroupCodes, files, zones, creatorName,
-      author, source, articleDate, classification }, dataSources) => {
+      author, source, articleDate, classification, articleType }, dataSources) => {
 
       const data = dataSources.articleController.upsertArticle(id, title, description, status, tags,
-        insGroupCodes, files, zones, creatorName, author, source, articleDate, classification, dataSources)
+        insGroupCodes, files, zones, creatorName, author, source, articleDate, classification, articleType, dataSources)
       return data
     },
 
@@ -188,14 +209,7 @@ const resolvers: IResolvers = {
       const data = dataSources.articleController.deleteArticle(id, dataSources)
       return data
     },
-    upsertArticleStatus: async (_, { id, title }, dataSources) => {
-      const data = dataSources.articleController.upsertArticleStatus(id, title, dataSources)
-      return data
-    },
-    deleteArticleStatus: async (_, { id }, dataSources) => {
-      const data = dataSources.articleController.deleteArticleStatus(id, dataSources)
-      return data
-    },
+
     upsertZone: async (_, { id, title }, dataSources) => {
       const data = dataSources.articleController.upsertZone(id, title, dataSources)
       return data
@@ -226,7 +240,11 @@ const resolvers: IResolvers = {
       const result = dataSources.insGroupController.save(data, dataSources)
       return result
     },
-
+    updateInsGroupParent: async (_, { code, newParentCode }, dataSources) => {
+      const result = dataSources.insGroupController.updateInsGroupParent(code, newParentCode, dataSources)
+      return result
+    },
+    
     // Access Groups
     upsertAccessGroup: async (_, { id, title, resourceAccesses }, dataSources) => {
       
@@ -243,6 +261,24 @@ const resolvers: IResolvers = {
     },
 
     //Hardcodes
+    upsertArticleStatus: async (_, { id, title }, dataSources) => {
+      const data = dataSources.hardcodeController.upsertArticleStatus(id, title, dataSources)
+      return data
+    },
+    deleteArticleStatus: async (_, { id }, dataSources) => {
+      const data = dataSources.hardcodeController.deleteArticleStatus(id, dataSources)
+      return data
+    },
+
+    upsertArticleType: async (_, { id, title }, dataSources) => {
+      const data = dataSources.hardcodeController.upsertArticleType(id, title, dataSources)
+      return data
+    },
+    deleteArticleType: async (_, { id }, dataSources) => {
+      const data = dataSources.hardcodeController.deleteArticleType(id, dataSources)
+      return data
+    },
+
     upsertClassification: async (_, { id, title, rank }, dataSources) => {
       const data = dataSources.hardcodeController.upsertClassification(id, title, rank, dataSources)
       return data
@@ -251,6 +287,7 @@ const resolvers: IResolvers = {
       const data = dataSources.hardcodeController.deleteClassification(id, dataSources)
       return data
     },
+
 
 
   }

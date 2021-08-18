@@ -29,7 +29,7 @@ class AccountController extends apollo_datasource_rest_1.RESTDataSource {
     }
     async getCurrentAccount(account_id) {
         const user = await Account.findOne({ account_id: account_id });
-        console.log(account_id);
+        //console.log(account_id);
         return user;
     }
     async login(username, password, dataSources) {
